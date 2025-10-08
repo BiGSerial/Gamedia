@@ -1,6 +1,5 @@
 # Normaliza fim de linha
 * text=auto eol=lf
-
 # Arquivos Unity em YAML (texto)
 *.meta text
 *.unity text
@@ -9,13 +8,11 @@
 *.controller text
 *.shader text
 *.cginc text
-
 # Mesclagem inteligente (Unity Smart Merge)
 *.unity     merge=unityyamlmerge
 *.prefab    merge=unityyamlmerge
 *.anim      merge=unityyamlmerge
 *.controller merge=unityyamlmerge
-
 # Arquivos binários / LFS
 *.png binary
 *.jpg binary
@@ -30,3 +27,5 @@
 *.mov filter=lfs diff=lfs merge=lfs -text
 *.ttf filter=lfs diff=lfs merge=lfs -text
 *.otf filter=lfs diff=lfs merge=lfs -text
+*.psb filter=lfs diff=lfs merge=lfs -text
+*.aif filter=lfs diff=lfs merge=lfs -text
