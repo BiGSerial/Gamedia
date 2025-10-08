@@ -1,0 +1,35 @@
+# ---- UNITY ----
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild*/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+Sysroot/
+Artifacts/
+
+# ---- IDE / EDITOR ----
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.code-workspace
+
+# ---- C# / DOTNET ----
+*.csproj
+*.sln
+*.unityproj
+*.user
+*.pidb
+*.booproj
+*.svd
+
+# ---- SISTEMA OPERACIONAL ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---- BUILD / EXPORT ----
+/Build*/
