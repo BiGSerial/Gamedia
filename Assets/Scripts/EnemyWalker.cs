@@ -16,6 +16,8 @@ public class EnemyWalker : MonoBehaviour
     [SerializeField] private float wallCheckDistance = 0.12f;
     [SerializeField] private LayerMask groundLayer;        // layer do chão/plataforma (Piso)
 
+    [SerializeField] private LayerMask wallMask; 
+
     [Header("Stomp (pisão do player)")]
     [SerializeField] private float stompYOffset = 0.1f;    // quanto acima do inimigo o player precisa estar
     [SerializeField] private float stompBounce = 8f;       // quique no player após matar
@@ -39,14 +41,18 @@ public class EnemyWalker : MonoBehaviour
     [SerializeField] private string walkBool = "walk";
     [SerializeField] private string deadTrigger = "dead";
 
+    public AudioSource deathSound;
+
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private Collider2D col;
+    private Collider2D[] allColliders;
     private bool isDead = false;
 
     // offsets locais originais dos sensores (pra espelhar no Flip)
     private Vector3 groundChkLocal0, wallChkLocal0;
     private float originalGravity;
+    private RigidbodyConstraints2D originalConstraints;
     private float lastHitTime = -999f;
 
     private void Awake()
@@ -55,6 +61,7 @@ public class EnemyWalker : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
         col = GetComponent<Collider2D>();
+    allColliders = GetComponentsInChildren<Collider2D>();
 
         // direção válida
         direction = direction < 0 ? -1 : 1;
@@ -62,6 +69,8 @@ public class EnemyWalker : MonoBehaviour
         // se não foi configurado no Inspector, usa layer "Piso"
         if (groundLayer.value == 0)
             groundLayer = LayerMask.GetMask("Piso");
+        if (wallMask.value == 0)    
+            wallMask = LayerMask.GetMask("Piso");
 
         if (groundCheck) groundChkLocal0 = groundCheck.localPosition;
         if (wallCheck)   wallChkLocal0   = wallCheck.localPosition;
@@ -69,6 +78,7 @@ public class EnemyWalker : MonoBehaviour
         UpdateSensorOffsets(); // garante posição correta ao iniciar
 
         originalGravity = rb.gravityScale;
+    originalConstraints = rb.constraints;
 
         // Recomendações no Rigidbody2D (confira no Inspector):
         // rb.freezeRotation = true;
@@ -89,7 +99,7 @@ public class EnemyWalker : MonoBehaviour
         if (isDead) return;
 
         // Move continuamente no eixo X
-        rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
+    rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
     }
 
     private void LateUpdate()
@@ -136,7 +146,7 @@ public class EnemyWalker : MonoBehaviour
     private void UpdateAnimator()
     {
         if (animator == null) return;
-        animator.SetBool(walkBool, Mathf.Abs(rb.linearVelocity.x) > 0.05f);
+    animator.SetBool(walkBool, Mathf.Abs(rb.linearVelocity.x) > 0.05f);
     }
 
     private void Flip()
@@ -174,6 +184,9 @@ public class EnemyWalker : MonoBehaviour
                 // ====== PISÃO: mata o inimigo, quica e pontua
                 Die();
 
+                // NOTE: mata o inimigo.
+                deathSound.Play();
+                
                 if (prb != null)
                     prb.linearVelocity = new Vector2(prb.linearVelocity.x, stompBounce);
 
@@ -196,7 +209,7 @@ public class EnemyWalker : MonoBehaviour
 
                     // Perde vida + respawn no início (feito pelo GameController)
                     if (GameController.instance != null)
-                        GameController.instance.LoseLife();
+                        GameController.instance.LoseLifeFromHit(transform.position);
                 }
             }
         }
@@ -207,15 +220,25 @@ public class EnemyWalker : MonoBehaviour
         isDead = true;
 
         // 1) desativa colisão para atravessar o piso
-        if (col) col.enabled = false;
+        if (allColliders != null)
+        {
+            for (int i = 0; i < allColliders.Length; i++)
+            {
+                if (allColliders[i])
+                    allColliders[i].enabled = false;
+            }
+        }
+
+        // garante que nenhum constraint impeça a queda
+        rb.constraints = RigidbodyConstraints2D.None;
 
         // 2) solta a física e configura queda “dramática”
-        rb.isKinematic = false;
+        rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = deathGravity;
 
         // Zera vel e aplica pulo + knockback
         float dirKnock = Random.value < 0.5f ? -1f : 1f;
-        rb.linearVelocity = Vector2.zero;
+    rb.linearVelocity = Vector2.zero;
         rb.AddForce(new Vector2(dirKnock * deathKnockbackX, deathJumpY), ForceMode2D.Impulse);
 
         // rotação leve (se quiser)

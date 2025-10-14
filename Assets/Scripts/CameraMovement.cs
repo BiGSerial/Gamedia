@@ -8,6 +8,7 @@ public class CameraMovement : MonoBehaviour
 
     [Header("Limites")]
     [SerializeField] private float leftLimit = -7.194367f;   // limite da borda esquerda (mundo)
+    [SerializeField] private float bottomLimit = -2.48f;      // limite inferior para a base da câmera
 
     [Header("Look Up / Down")]
     [SerializeField] private float lookOffsetY = 2f;         // quanto a câmera desloca no Y ao olhar
@@ -20,7 +21,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] private Vector3 groundCheckOffset = new Vector3(0f, -0.5f, 0f);
 
     private Camera cam;
-private float currentLookY; // deslocamento atual aplicado ao Y
+    private float currentLookY; // deslocamento atual aplicado ao Y
 
     void Awake()
     {
@@ -67,6 +68,9 @@ private float currentLookY; // deslocamento atual aplicado ao Y
         float halfWidth = cam.orthographicSize * cam.aspect;   // metade da largura visível
         float minCamX = leftLimit + halfWidth;                  // menor X permitido para a CÂMERA
         target.x = Mathf.Max(target.x, minCamX);
+
+        float minCamY = bottomLimit + cam.orthographicSize;     // garante base >= bottomLimit
+        target.y = Mathf.Max(target.y, minCamY);
 
         transform.position = target;
     }

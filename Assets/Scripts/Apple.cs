@@ -8,6 +8,8 @@ public class Apple : MonoBehaviour
     private int scoreValue = 1;
     public GameObject prefabCollected;
 
+    public AudioSource collectSound;
+
     void Start()
     {
         sr = GetComponent<SpriteRenderer>();
@@ -21,9 +23,13 @@ public class Apple : MonoBehaviour
         // Somar pontos no GameController
         if (GameController.instance != null)
         {
+
             GameController.instance.AddScore(scoreValue);
+
+
         }
-        
+
+        collectSound.Play();
 
         // Desativar visual/colisor da maçã
         sr.enabled = false;

@@ -25,6 +25,17 @@ Artifacts/
 *.booproj
 *.svd
 
+
+# Pasta local de assets baixados (não subir)
+Assets/_ThirdParty_local/
+Assets/__AssetStoreLocal/
+Assets/_Downloads/
+
+# (opcional) ignore metas da pasta ignorada
+Assets/_ThirdParty_local.meta
+Assets/__AssetStoreLocal.meta
+Assets/_Downloads.meta
+
 # ---- SISTEMA OPERACIONAL ----
 .DS_Store
 Thumbs.db

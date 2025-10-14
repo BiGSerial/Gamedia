@@ -5,6 +5,11 @@ public class Player : MonoBehaviour
 {
     public float speed, jumpForce;
 
+    public AudioSource jumpSound;
+    public AudioSource footstepSound;
+
+    public AudioSource deathSound;
+
     private Rigidbody2D rb;
     private Animator animator;
 
@@ -85,6 +90,7 @@ public class Player : MonoBehaviour
                 isGrounded = false;
                 canDoubleJump = true;
                 animator.SetBool("jump", true);
+                jumpSound.Play();
             }
             else if (canDoubleJump)
             {
@@ -92,6 +98,7 @@ public class Player : MonoBehaviour
                 animator.SetBool("jump", false);
                 rb.AddForce(new Vector2(0f, jumpForce / 1.5f), ForceMode2D.Impulse);
                 canDoubleJump = false;
+                jumpSound.Play();
             }
         }
     }
