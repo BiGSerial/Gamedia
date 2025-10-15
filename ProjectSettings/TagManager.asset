@@ -8,6 +8,7 @@ TagManager:
   - Piso
   - Enemy
   - ParedeSemRidgy
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - Ground
   - Enemy
   - Back
-  - 
+  - Wall
   - 
   - 
   - 

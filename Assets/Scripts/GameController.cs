@@ -244,6 +244,13 @@ public class GameController : MonoBehaviour
             StartCoroutine(TempInvulnerability(playerTransform.gameObject, invulnSeconds, enemyLayerName));
     }
 
+    // Permite que checkpoints atualizem o ponto de respawn em runtime
+    public void SetRespawn(Transform point)
+    {
+        if (point != null)
+            respawnPoint = point;
+    }
+
     public void LoseLifeFromHit(Vector2 hitFromPosition)
     {
         if (isDying) return;

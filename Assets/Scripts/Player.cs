@@ -1,14 +1,17 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class Player : MonoBehaviour
 {
     public float speed, jumpForce;
+    [Header("Sprint")]
+    public float sprintMultiplier = 2f;
+    [Range(1f, 2.5f)] public float runAnimSpeed = 1.4f; // multiplicador de animaÃ§Ã£o ao correr
 
     public AudioSource jumpSound;
     public AudioSource footstepSound;
 
-    public AudioSource deathSound;
+   
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -28,7 +31,21 @@ public class Player : MonoBehaviour
     void Move()
     {
         Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0f, 0f);
-        Vector3 newPosition = transform.position + movement * speed * Time.deltaTime;
+
+        bool sprintKey = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetButton("Fire3");
+        bool isMoving = Mathf.Abs(movement.x) > 0.0001f;
+        // Só inicia corrida no chão; no ar mantém apenas se já vinha correndo e a tecla continua pressionada
+        if (isGrounded)
+        {
+            sprintLatched = isMoving && sprintKey;
+        }
+        else
+        {
+            sprintLatched = sprintLatched && sprintKey;
+        }
+        float currentSpeed = speed * (sprintLatched ? sprintMultiplier : 1f);
+
+        Vector3 newPosition = transform.position + movement * currentSpeed * Time.deltaTime;
 
         // Limit the minimum x position
         if (newPosition.x < -7.194367f)
@@ -36,10 +53,13 @@ public class Player : MonoBehaviour
 
         transform.position = newPosition;
 
-        if (movement != Vector3.zero)
-            animator.SetBool("walking", true);
+        bool walking = isMoving;
+        animator.SetBool("walking", walking);
+        // velocidade da animaÃ§Ã£o ao correr
+        if (walking && isGrounded)
+            animator.speed = (sprintLatched ? runAnimSpeed : 1f);
         else
-            animator.SetBool("walking", false);
+            animator.speed = 1f;
 
         // Flip the sprite based on movement direction
         if (Input.GetAxis("Horizontal") < 0)
@@ -59,6 +79,7 @@ public class Player : MonoBehaviour
 
     private bool canDoubleJump = false;
     private bool isGrounded = false;
+    private bool sprintLatched = false;
 
     void OnCollisionEnter2D(Collision2D collision)
     {
