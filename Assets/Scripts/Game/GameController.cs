@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using System.Collections;
 using UnityEngine.SceneManagement;
@@ -9,11 +9,13 @@ public class GameController : MonoBehaviour
     public int highScore;
     public int lifeCount = 3;
     public int nextLifeAt = 100;
+    public int appleCount;
 
     [Header("UI (TextMeshPro)")]
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text highScoreText;
     [SerializeField] private TMP_Text livesText;
+    [SerializeField] private TMP_Text countAppleText; // Texto para exibir a contagem de maçãs (se houver)
 
     [Header("Respawn & Invencibilidade")]
     [SerializeField] private Transform respawnPoint;     // arraste um Empty no início da fase
@@ -22,6 +24,10 @@ public class GameController : MonoBehaviour
     [Header("Queda para fora da tela")]
     [SerializeField] private float cameraBottomLimit = -2.48f; // mesmo valor configurado na câmera
     [SerializeField] private float fallDeathBuffer = 0.5f;     // margem além da base visível
+    [Header("Limites de Movimento Horizontal")]
+    [SerializeField] private bool useHorizontalLimits = false;
+    [SerializeField] private float minX = -7.5f;
+    [SerializeField] private float maxX = 7.5f;
 
     public static GameController instance;
 
@@ -50,6 +56,16 @@ public class GameController : MonoBehaviour
         // Re-vincula referências quando uma cena é (re)carregada
         if (instance == this)
             SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnValidate()
+    {
+        if (minX > maxX)
+        {
+            float temp = minX;
+            minX = maxX;
+            maxX = temp;
+        }
     }
 
     void Start()
@@ -88,6 +104,20 @@ public class GameController : MonoBehaviour
         UpdateHUD();
     }
 
+    public void CountApple(int amount)
+    {
+        appleCount += amount;
+      
+
+        while (appleCount >= nextLifeAt)
+        {
+            GainLife();
+            nextLifeAt += 100;
+            if (newLifeSound) newLifeSound.Play();
+        }
+        UpdateHUD();
+    }
+
     public void LoseLife()
     {
         if (isDying) return;
@@ -114,6 +144,28 @@ public class GameController : MonoBehaviour
         UpdateHUD();
     }
 
+    public bool AreHorizontalLimitsEnabled => useHorizontalLimits;
+    public float CurrentMinX => minX;
+    public float CurrentMaxX => maxX;
+
+    public void SetHorizontalLimits(float min, float max, bool enabled = true)
+    {
+        useHorizontalLimits = enabled;
+
+        if (!enabled)
+            return;
+
+        if (min > max)
+        {
+            float temp = min;
+            min = max;
+            max = temp;
+        }
+
+        minX = min;
+        maxX = max;
+    }
+
     private void UpdateHUD()
     {
         // Garante que, se a cena foi recarregada, as refs sejam refeitas
@@ -123,6 +175,7 @@ public class GameController : MonoBehaviour
         if (scoreText)     scoreText.text     = totalScore.ToString("D4");
         if (highScoreText) highScoreText.text = highScore.ToString("D4");
         if (livesText)     livesText.text     = lifeCount.ToString("D2");
+        if (countAppleText) countAppleText.text = appleCount.ToString("D4");
     }
 
     // private void RebindHUD()
@@ -139,6 +192,7 @@ public class GameController : MonoBehaviour
         if (!scoreText)     scoreText     = FindTMPByNameOrTag("ScoreText", new[] { "score" });
         if (!highScoreText) highScoreText = FindTMPByNameOrTag("HighScoreText", new[] { "high", "record" });
         if (!livesText)     livesText     = FindTMPByNameOrTag("LivesText", new[] { "life", "vidas" });
+        if (!countAppleText) countAppleText = FindTMPByNameOrTag("CountAppleText", new[] { "apple", "maçã" });
     }
 
     private void RefindRespawnPoint()
@@ -351,3 +405,5 @@ public class GameController : MonoBehaviour
         SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }
 }
+
+

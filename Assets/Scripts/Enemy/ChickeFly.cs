@@ -19,7 +19,7 @@ public class ChickeFly : MonoBehaviour
 
     [Header("Stomp (pulo na cabeça)")]
     [SerializeField] private float stompBounce = 8f;
-    [SerializeField] private int stompScore = 100;
+    [SerializeField] private int stompScore = 10;
 
     [Header("Trigger Settings")]
     [SerializeField] private BoxCollider2D headTrigger;
@@ -47,6 +47,10 @@ public class ChickeFly : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         originalGravity = rb.gravityScale;
+
+        // While alive, ignore gravity and move manually (flying behavior)
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
 
         allColliders = GetComponentsInChildren<Collider2D>(true);
     }
@@ -119,7 +123,32 @@ public class ChickeFly : MonoBehaviour
             }
         }
     }
-    
+
+    // Fallback: also allow stomp detection via solid collision
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDead) return;
+
+        if (collision.collider.CompareTag("Player"))
+        {
+            Rigidbody2D prb = collision.collider.attachedRigidbody;
+            bool playerAbove = collision.transform.position.y > (transform.position.y + 0.05f);
+            bool playerDescending = (prb != null && prb.linearVelocity.y <= 0f);
+
+            if (playerAbove && playerDescending)
+            {
+                Die();
+                if (deathSound) deathSound.Play();
+
+                if (prb != null)
+                    prb.linearVelocity = new Vector2(prb.linearVelocity.x, stompBounce);
+
+                if (GameController.instance != null)
+                    GameController.instance.AddScore(stompScore);
+            }
+        }
+    }
+
     void Die()
     {
         if (isDead) return;

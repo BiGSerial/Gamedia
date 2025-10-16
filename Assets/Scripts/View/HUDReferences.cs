@@ -7,4 +7,5 @@ public class HUDReferences : MonoBehaviour
     public TMP_Text scoreText;
     public TMP_Text highScoreText;
     public TMP_Text livesText;
+    public TMP_Text countAppleText;
 }

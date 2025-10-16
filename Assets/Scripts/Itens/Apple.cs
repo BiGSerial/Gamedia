@@ -5,7 +5,8 @@ public class Apple : MonoBehaviour
     private SpriteRenderer sr;
     private CircleCollider2D cc;
 
-    private int scoreValue = 1;
+    private int scoreValue = 5;
+    private int scorePerApple = 1;
     public GameObject prefabCollected;
 
     public AudioSource collectSound;
@@ -25,6 +26,7 @@ public class Apple : MonoBehaviour
         {
 
             GameController.instance.AddScore(scoreValue);
+            GameController.instance.CountApple(scorePerApple);
 
 
         }
